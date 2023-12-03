@@ -20,6 +20,9 @@ const fakeTestDto: TestDto = {
 		'2020-01-01T00:00:00.000Z'
 	],
 	boolean: true,
+	booleans: [
+		true
+	],
 	myTestObj: {
 			number: 4200,
 			numbers: [

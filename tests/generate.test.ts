@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs-extra';
 import * as src from '../src';
 
-const basePath = 'C:\\Users\\t19aqn\\source\\repos\\DEV\\PROJECTS\\TESTING\\dto-to-model\\tests\\';
+const basePath = process.cwd().toString() + '\\tests\\';
 const dtosPath = basePath + 'assets\\dtos\\';
 const resultsPath = basePath + 'assets\\results\\';
 

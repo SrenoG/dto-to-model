@@ -11,6 +11,7 @@ export class Test {
 	public dateNullable?: Date;
 	public dateNullables?: Date[];
 	public boolean?: boolean;
+	public booleans?: boolean[];
 	public myTestObj: TestObject;
 	public myTestObjs: TestObject[];
 
@@ -31,6 +32,7 @@ export class Test {
 			dateNullable: dto.dateNullable ? DateHelper.fromUtcStringToDate(dto.dateNullable) : null,
 			dateNullables: dto.dateNullables?.map(value => DateHelper.fromUtcStringToDate(value)) ?? [],
 			boolean: dto.boolean,
+			booleans: dto.booleans ?? [],
 			myTestObj: dto.myTestObj ? TestObject.fromDto(dto.myTestObj) : null,
 			myTestObjs: dto.myTestObjs?.map(value => TestObject.fromDto(value)) ?? []
 		});
@@ -49,6 +51,7 @@ export class Test {
 			dateNullable: this.dateNullable ?  DateHelper.fromDateToString(this.dateNullable) : null,
 			dateNullables: this.dateNullables?.map(value =>  DateHelper.fromDateToString(value)) ?? null,
 			boolean: this.boolean,
+			booleans: this.booleans ?? [],
 			myTestObj: this.myTestObj ? this.myTestObj.toDto() : null,
 			myTestObjs: this.myTestObjs?.map(value => value.toDto()) ?? null
 		};

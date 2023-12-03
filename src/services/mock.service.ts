@@ -2,7 +2,7 @@ import { copyFileSync, readFileSync, removeSync, writeFileSync } from 'fs-extra'
 import { StringValue } from '../enum';
 import { dtoFileExtensions } from '../helpers';
 import { FileDetails, PropertyType, StringRef } from "../interfaces";
-import { getFileDetails, getPropertyWithValue, lineTextValid } from "./shared.service";
+import { cleanLineText, getFileDetails, getPropertyWithValue, lineTextValid, stringArrayToTab } from "./shared.service";
 
 
 export function generateMocks(fsPath: string): void {
@@ -44,22 +44,17 @@ function getMocksTextFromDto(fileDetails: FileDetails, lines: string[]): string 
 				showingText += StringValue.R;
 			} else {
 				if(![StringValue.TO_DTO_STRING.toString(), StringValue.FROM_DTO_STRING.toString(), StringValue.CLOSE.toString()].some(x => lineText.includes(x))) {
-					const cleanString = lineText
-						.replace(StringValue.PUBLIC + ' ', StringValue.EMPTY)
-						.replace('?', StringValue.EMPTY)
-						.replace(StringValue.SEMI_COLON, StringValue.EMPTY)
-						.replace('null | ', StringValue.EMPTY)
-						.replace(' | null', StringValue.EMPTY)
-						?.trim();
-					let propertyName = cleanString.split(' ')[0];
-					let propertyType = cleanString.split(' ')[1].replace(StringValue.DTO, StringValue.EMPTY);
+
+					const property = lineText.split(StringValue.COLON);
+					let propertyName = cleanLineText(property[0]);
+					let propertyType = cleanLineText(property[1]);
+
 					if(propertyType?.includes(StringValue.ARRAY)){
-						const propertySplit = propertyType.split(StringValue.ARRAY);
-						propertyType = propertySplit[0] + propertySplit[1].replace('>', StringValue.EMPTY).replace(StringValue.SEMI_COLON, StringValue.EMPTY)
+						propertyType = stringArrayToTab(propertyType);
 						if(propertyType.includes(StringValue.DATE)){
 							propertyType = StringValue.DATE
+							propertyType = propertyType + StringValue.TAB;
 						}
-						propertyType = propertyType + StringValue.TAB;
 					}
 					properties.push({name: propertyName, type: propertyType} as PropertyType);					
 				}

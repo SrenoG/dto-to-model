@@ -10,3 +10,5 @@ generateEnum
 Check into tests/results folder what kind of generation you can expect from tests/dtos files.
 You have to use it into node_module OpenApi generated API folder to found all related Dto's and populate specs and mocks.
 It's a BETA actually, need some improvement and cleaning code
+
+See https://github.com/SrenoG/dto-to-model-vscode to use it in vscode extension

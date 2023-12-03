@@ -1,6 +1,6 @@
 {
   "name": "dto-to-model",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -13,12 +13,18 @@
     "build": "rimraf ./build && tsup",
     "publish": "npm run build && npm link"
   },
-  "keywords": [],
+  "keywords": [
+    "model",
+    "api",
+    "openapi",
+    "generator",
+    "dto"
+  ],
   "author": "Sereno",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-user/repo-url.git"
+    "url": "https://github.com/SrenoG/dto-to-model"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

@@ -3,7 +3,7 @@ import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
 import { FileDetails, PropertyType, StringRef } from "../interfaces";
 import { getModelTextFromDocument } from "./model.service";
-import { getFileDetails, getPropertyWithValue, lineTextValid } from "./shared.service";
+import { cleanLineText, getFileDetails, getPropertyWithValue, lineTextValid } from "./shared.service";
 
 export function generateSpecs(fsPath: string): void {
 	const fileDetails = getFileDetails(fsPath);
@@ -51,9 +51,9 @@ function getSpecFromDocument(fileDetails: FileDetails, lines: string[]): string 
 				showingText += StringValue.R;
 			} else {
 				if(lineText.includes(StringValue.PUBLIC) && ![StringValue.TO_DTO_STRING, StringValue.FROM_DTO_STRING].some(x => lineText.includes(x))) {
-					let cleanString = lineText.replace(StringValue.PUBLIC + ' ', StringValue.EMPTY).replace('?', StringValue.EMPTY).replace(StringValue.SEMI_COLON, StringValue.EMPTY)?.trim();
-					let propertyName = cleanString.split(' ')[0];
-					let propertyType = cleanString.split(' ')[1];
+					const property = lineText.split(StringValue.COLON);
+					let propertyName = cleanLineText(property[0]);
+					let propertyType = cleanLineText(property[1]);
 					properties.push({name: propertyName, type: propertyType} as PropertyType);
 				}
 			}

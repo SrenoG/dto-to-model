@@ -2,7 +2,7 @@ import { copySync, readFileSync, removeSync, writeFileSync } from "fs-extra";
 import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
 import { PropertyType } from '../interfaces/property-type.interface';
-import { getFileDetails, lineTextValid } from "./shared.service";
+import { cleanLineText, getFileDetails, isPrimitiveObject, lineTextValid, stringArrayToTab } from "./shared.service";
 
 
 export function generateModel(fsPath: string): void {
@@ -45,23 +45,16 @@ export function getModelTextFromDocument(lines: string[]): string | null {
 			} else {
 				if(lineText !== StringValue.CLOSE) {
 					let isNullable =  lineText.includes('?:');
-					let property = lineText.replace(' | null', StringValue.EMPTY).replace('null | ', StringValue.EMPTY)
-					.replace(StringValue.SEMI_COLON, StringValue.EMPTY)
-					.replace(StringValue.COLON, StringValue.EMPTY)
-					.replace('?', StringValue.EMPTY)
-					.replace(StringValue.DTO, StringValue.EMPTY)
-					.trimEnd()
-					.trimStart()
-					.split(' ');
+					let property = cleanLineText(lineText).split(' ')
 					let propertyName = property[0];
 					let propertyType = property[1];
+
 					if(propertyType?.includes(StringValue.ARRAY)){
-						const propertySplit = propertyType.split(StringValue.ARRAY);
-						propertyType = propertySplit[1].replace('>', StringValue.EMPTY);
+						propertyType = stringArrayToTab(propertyType);
 						if(propertyType.includes(StringValue.DATE)){
 							propertyType = StringValue.DATE
+							propertyType = propertyType + StringValue.TAB;
 						}
-						propertyType = propertyType + StringValue.TAB;
 					} else if((propertyName.endsWith(StringValue.DATE) || propertyType.includes(StringValue.DATE))) {
 						propertyType = StringValue.DATE;
 					}
@@ -93,7 +86,7 @@ function getModelText(mainModelName: string, list: PropertyType[]): string {
 	showingTextModel += 'export class ' + mainModelName + ' ' + StringValue.OPEN;
 	showingTextModel += StringValue.R;
 	list.forEach(element => {
-		showingTextModel += StringValue.T + 'public' + StringValue.SPACE + element.name + (element.nullable ? '?' : StringValue.EMPTY) + StringValue.COLON + StringValue.SPACE + element.type + StringValue.SEMI_COLON;
+		showingTextModel += StringValue.T + StringValue.PUBLIC + StringValue.SPACE + element.name + (element.nullable ? '?' : StringValue.EMPTY) + StringValue.COLON + StringValue.SPACE + element.type + StringValue.SEMI_COLON;
 		showingTextModel += StringValue.R;
 	});
 	return showingTextModel;
@@ -135,7 +128,7 @@ function getModelFromDto(mainModelName: string, properties: PropertyType[]): str
 			} else {
 				showingTextModel += firstPartText + StringValue.MAP_VALUE + propertyType + '.fromDto(' + StringValue.VALUE + '))' + StringValue.ELSE_EMPTY_ARRAY;
 			}
-		} else if([StringValue.STRING.toString(), StringValue.NUMBER.toString(), StringValue.BOOLEAN.toString()]?.includes(property.type)){
+		} else if(isPrimitiveObject(property.type)){
 			showingTextModel += firstPartText;
 		} else if(property.type.endsWith(StringValue.ENUM)){
 			showingTextModel += firstPartText + StringValue.IF + property.type + 'FromDto' + '[' + StringValue.LOWER_DTO + StringValue.DOT + property.name + ']' + StringValue.ELSE_NULL;
@@ -207,4 +200,5 @@ function getModelToDto(mainModelName: string, properties: PropertyType[]): strin
 	showingTextModel += StringValue.CLOSE;
 	return showingTextModel;
 }
+
 

@@ -7,7 +7,7 @@ export function getPropertyWithValue(fileDetails: FileDetails, stringRef: String
 	const stringFake = stringFakeBuilder(isModel, isDto);
 	properties.forEach((property, index) => {
 		addTabulation(stringRef, tabCount);
-        stringRef.value += (property.name.replace(StringValue.COLON, StringValue.EMPTY).substring(property.name.lastIndexOf(".") + 1, property.name.length) + ':');
+        stringRef.value += (property.name.substring(property.name.lastIndexOf(".") + 1, property.name.length) + ':');
 		stringRef.value += StringValue.SPACE;
 		if(isEmpty) {
 			if(property.type === StringValue.NUMBER || property.type === StringValue.BOOLEAN || property.type === StringValue.STRING ){
@@ -19,41 +19,36 @@ export function getPropertyWithValue(fileDetails: FileDetails, stringRef: String
 			}
 		} else {
 			//TODO: Remove colon from the begining
-			property.name = property.name.replace(StringValue.COLON, StringValue.EMPTY);
 			if(property.type?.includes(StringValue.TAB) ){
 				if(!isFake){
-					const name = property.name.replace(StringValue.COLON, StringValue.EMPTY);
+					const name = property.name
 					const type = property.type.replace(StringValue.TAB, StringValue.EMPTY);
 					if(isModel){
 						if(type === StringValue.DATE){
-							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
+							stringRef.value += getMapString(stringFake, name) + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
 						} else if (type.includes(StringValue.ENUM)) {
-							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + type + enumFrom(isModel, isDto) + '[' + StringValue.VALUE + ']' + ')';
+							stringRef.value += getMapString(stringFake, name) + type + enumFrom(isModel, isDto) + '[' + StringValue.VALUE + ']' + ')';
 						} else if (type === StringValue.NUMBER || type === StringValue.STRING || type === StringValue.BOOLEAN) {
 							stringRef.value += stringFake + StringValue.DOT + name
 						} else {
-							stringRef.value += stringFake + StringValue.DOT + name+ StringValue.MAP_VALUE + type + StringValue.DOT + objectFrom(isModel, isDto) +'(' + StringValue.VALUE + ')' + ')';
+							stringRef.value += getMapString(stringFake, name) + type + StringValue.DOT + objectFrom(isModel, isDto) +'(' + StringValue.VALUE + ')' + ')';
 						}
 					} else if(isDto){
 						if(type === StringValue.DATE){
-							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
+							stringRef.value += getMapString(stringFake, name) + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
 						} else if (type.includes(StringValue.ENUM)) {
-							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + type + enumFrom(isModel, isDto)+ '[' + StringValue.VALUE + ']' + ')';
+							stringRef.value += getMapString(stringFake, name) + type + enumFrom(isModel, isDto)+ '[' + StringValue.VALUE + ']' + ')';
 						}else if (type === StringValue.NUMBER || type === StringValue.STRING || type === StringValue.BOOLEAN) {
 							stringRef.value += stringFake + StringValue.DOT + name
 						}else {
-							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + StringValue.VALUE + StringValue.DOT + objectFrom(isModel, isDto) +'()' + ')';
+							stringRef.value += getMapString(stringFake, name) + StringValue.VALUE + StringValue.DOT + objectFrom(isModel, isDto) +'()' + ')';
 						}
 					}
 				} else {
 					stringRef.value += '[';
 					stringRef.value += StringValue.R;
-					if(!property.type?.includes(StringValue.STRING)
-						&& !property.type?.includes(StringValue.NUMBER)
-						&& !property.type?.includes(StringValue.DATE)
-						&& !property.type?.includes(StringValue.ENUM)
-						&& !property.type?.includes(StringValue.BOOLEAN)){
-							readDtoFile(fileDetails, stringRef, false, tabCount + 1, {...property, type: property.type.replace(StringValue.TAB, StringValue.EMPTY)}, isDto, isEmpty, isModel, isFake);
+					if(isObjectDto(property.type)){
+						readDtoFile(fileDetails, stringRef, false, tabCount + 1, {...property, type: property.type.replace(StringValue.TAB, StringValue.EMPTY)}, isDto, isEmpty, isModel, isFake);
 					} else {						
 						addTabulation(stringRef, tabCount + 1);					
 						addPropertyWithValueByType(fileDetails, stringRef, tabCount + 1, property, isDto, isEmpty, isModel, isFake, true);
@@ -210,7 +205,6 @@ function addTabulation(stringRef: StringRef, tabCount: number) {
 		stringRef.value += StringValue.T;
 	}
 }
-export const kebabize = (str: string) => str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase());
 
 export function getAllUniqueFromStringList(value: string, index: number, array: string[]) {
 	return array.indexOf(value) === index;
@@ -218,8 +212,47 @@ export function getAllUniqueFromStringList(value: string, index: number, array: 
 export function lineTextValid(lineText: string): boolean {
 	return lineText !== null && lineText !== '' && !lineText.includes('import') && !lineText.includes('*') && !lineText.includes("//");
 }
-export const stringFakeBuilder = (isModel: boolean, isDto: boolean) => isModel ? 'fakeDto' : isDto ? 'fakeModel' : 'fake';
-export const enumFrom = (isModel: boolean, isDto: boolean) => isModel ? 'FromDto' : isDto ? 'ToDto' : 'Dto';
-export const dateFrom = (isModel: boolean, isDto: boolean) => isModel ? StringValue.STRING_TO_DATE : isDto ? StringValue.DATE_TO_STRING : 'Date';
-export const newDate = (isModel: boolean, isDto: boolean) =>  isModel ? 'new Date(2020,1,1)' : isDto ? '\'2020-01-01T00:00:00.000Z\'' : 'Date';
-export const objectFrom = (isModel: boolean, isDto: boolean) => isModel ? 'fromDto' : isDto ? 'toDto' : 'Dto';
+
+export function removeStringFromString(string: string, toRemove: string[]): string {
+	toRemove.forEach(element => {
+		string = string.replace(element, StringValue.EMPTY)
+	});
+	return string;
+}
+
+export function cleanLineText(lineText: string) {
+	return removeStringFromString(lineText, [
+		StringValue.PUBLIC,
+		' | null',
+		'null | ',
+		StringValue.SEMI_COLON,
+		StringValue.COLON,
+		'?',
+		StringValue.DTO
+	]).trim()
+}
+
+export function stringArrayToTab(propertyType: string): string {
+	const propertySplit = propertyType.split(StringValue.ARRAY);
+	return propertySplit[0] + propertySplit[1].replace('>', StringValue.EMPTY).replace(StringValue.SEMI_COLON, StringValue.EMPTY) + StringValue.TAB;
+}
+
+const kebabize = (str: string) => str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase());
+const stringFakeBuilder = (isModel: boolean, isDto: boolean) => isModel ? 'fakeDto' : isDto ? 'fakeModel' : 'fake';
+const enumFrom = (isModel: boolean, isDto: boolean) => isModel ? 'FromDto' : isDto ? 'ToDto' : 'Dto';
+const dateFrom = (isModel: boolean, isDto: boolean) => isModel ? StringValue.STRING_TO_DATE : isDto ? StringValue.DATE_TO_STRING : 'Date';
+const newDate = (isModel: boolean, isDto: boolean) =>  isModel ? 'new Date(2020,1,1)' : isDto ? '\'2020-01-01T00:00:00.000Z\'' : 'Date';
+const objectFrom = (isModel: boolean, isDto: boolean) => isModel ? 'fromDto' : isDto ? 'toDto' : 'Dto';
+const getMapString = (stringFake: string, name: string) => stringFake + StringValue.DOT + name + StringValue.MAP_VALUE;
+
+function isObjectDto(propertyType: any) {
+	return !propertyType?.includes(StringValue.STRING)
+			&& !propertyType?.includes(StringValue.NUMBER)
+			&& !propertyType?.includes(StringValue.DATE)
+			&& !propertyType?.includes(StringValue.ENUM)
+			&& !propertyType?.includes(StringValue.BOOLEAN)
+}
+
+export function isPrimitiveObject(type: string): boolean {
+	return [StringValue.STRING.toString(), StringValue.NUMBER.toString(), StringValue.BOOLEAN.toString()]?.includes(type)
+}

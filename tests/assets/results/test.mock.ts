@@ -44,7 +44,10 @@ const fakeTestDto: TestDto = {
 			dateNullables: [
 				'2020-01-01T00:00:00.000Z'
 			],
-			boolean: true
+			boolean: true,
+			booleans: [
+				true
+			]
 		},
 	myTestObjs: [
 		{
@@ -68,7 +71,10 @@ const fakeTestDto: TestDto = {
 			dateNullables: [
 				'2020-01-01T00:00:00.000Z'
 			],
-			boolean: true
+			boolean: true,
+			booleans: [
+				true
+			]
 		}
 	]
 };

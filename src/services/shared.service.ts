@@ -12,7 +12,9 @@ export function getPropertyWithValue(fileDetails: FileDetails, stringRef: String
 		if(isEmpty) {
 			if(property.type === StringValue.NUMBER || property.type === StringValue.BOOLEAN || property.type === StringValue.STRING ){
 				stringRef.value += 'undefined';
-			} else {
+			} else if(property.type.includes(StringValue.TAB)){
+				stringRef.value += StringValue.TAB;
+			} else {		
 				stringRef.value += 'null';
 			}
 		} else {

@@ -44,7 +44,7 @@ function getMocksTextFromDto(fileDetails: FileDetails, lines: string[]): string 
 				showingText += StringValue.R;
 			} else {
 				if(![StringValue.TO_DTO_STRING.toString(), StringValue.FROM_DTO_STRING.toString(), StringValue.CLOSE.toString()].some(x => lineText.includes(x))) {
-					let cleanString = lineText
+					const cleanString = lineText
 						.replace(StringValue.PUBLIC + ' ', StringValue.EMPTY)
 						.replace('?', StringValue.EMPTY)
 						.replace(StringValue.SEMI_COLON, StringValue.EMPTY)
@@ -53,23 +53,15 @@ function getMocksTextFromDto(fileDetails: FileDetails, lines: string[]): string 
 						?.trim();
 					let propertyName = cleanString.split(' ')[0];
 					let propertyType = cleanString.split(' ')[1].replace(StringValue.DTO, StringValue.EMPTY);
-					let count;
 					if(propertyType?.includes(StringValue.ARRAY)){
 						const propertySplit = propertyType.split(StringValue.ARRAY);
-						count = Number(propertySplit[1][propertySplit[1].length - 1]); //TODO: What i want to do ? Count probably never has value
-						propertyType = propertySplit[0] + propertySplit[1].replace('>', StringValue.EMPTY).replace(StringValue.SEMI_COLON, StringValue.EMPTY).replace(count.toString(), StringValue.EMPTY)
+						propertyType = propertySplit[0] + propertySplit[1].replace('>', StringValue.EMPTY).replace(StringValue.SEMI_COLON, StringValue.EMPTY)
 						if(propertyType.includes(StringValue.DATE)){
 							propertyType = StringValue.DATE
 						}
 						propertyType = propertyType + StringValue.TAB;
 					}
-					if(!isNaN(count!)){ 
-						for (let index = 0; index < count!; index++) {
-							properties.push({name: propertyName, type: propertyType} as PropertyType);			
-						}
-					} else {
-						properties.push({name: propertyName, type: propertyType} as PropertyType);
-					}
+					properties.push({name: propertyName, type: propertyType} as PropertyType);					
 				}
 			}
 		}

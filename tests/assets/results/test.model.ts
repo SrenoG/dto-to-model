@@ -1,4 +1,3 @@
-import { DateHelper } from '@nag/sma/shared';
 export class Test {
 	public number?: number;
 	public numbers?: number[];
@@ -46,10 +45,10 @@ export class Test {
 			strings: this.strings ?? [],
 			enum: this.enum ? TestEnumToDto[this.enum] : null,
 			enums: this.enums?.map(value => TestEnumToDto[value]) ?? null,
-			date: this.date ?  DateHelper.fromDateToString(this.date) : null,
-			dates: this.dates?.map(value =>  DateHelper.fromDateToString(value)) ?? null,
-			dateNullable: this.dateNullable ?  DateHelper.fromDateToString(this.dateNullable) : null,
-			dateNullables: this.dateNullables?.map(value =>  DateHelper.fromDateToString(value)) ?? null,
+			date: this.date ? DateHelper.fromDateToString(this.date) : null,
+			dates: this.dates?.map(value => DateHelper.fromDateToString(value)) ?? null,
+			dateNullable: this.dateNullable ? DateHelper.fromDateToString(this.dateNullable) : null,
+			dateNullables: this.dateNullables?.map(value => DateHelper.fromDateToString(value)) ?? null,
 			boolean: this.boolean,
 			booleans: this.booleans ?? [],
 			myTestObj: this.myTestObj ? this.myTestObj.toDto() : null,

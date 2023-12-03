@@ -1,4 +1,3 @@
-import { DateHelper } from '@nag/sma/shared';
 describe('Test Model', () => {
 	it('should create an empty instance (check constructor)', () => {
 		const model = new Test();
@@ -10,18 +9,19 @@ describe('Test Model', () => {
 		const fakeEmptyDto = {};
 		const expectedEmptyModelInstance = new Test({
 			number: undefined,
-			numbers: null,
+			numbers: [],
 			string: undefined,
-			strings: null,
+			strings: [],
 			enum: null,
-			enums: null,
+			enums: [],
 			date: null,
-			dates: null,
+			dates: [],
 			dateNullable: null,
-			dateNullables: null,
+			dateNullables: [],
 			boolean: undefined,
+			booleans: [],
 			myTestObj: null,
-			myTestObjs: null
+			myTestObjs: []
 		});
 		expect(Test.fromDto(fakeEmptyDto)).toEqual(expectedEmptyModelInstance);
 	});
@@ -49,6 +49,9 @@ describe('Test Model', () => {
 				'2020-01-01T00:00:00.000Z'
 			],
 			boolean: true,
+			booleans: [
+				true
+			],
 			myTestObj: {
 					number: 4200,
 					numbers: [
@@ -70,7 +73,10 @@ describe('Test Model', () => {
 					dateNullables: [
 						'2020-01-01T00:00:00.000Z'
 					],
-					boolean: true
+					boolean: true,
+					booleans: [
+						true
+					]
 				},
 			myTestObjs: [
 				{
@@ -94,7 +100,10 @@ describe('Test Model', () => {
 					dateNullables: [
 						'2020-01-01T00:00:00.000Z'
 					],
-					boolean: true
+					boolean: true,
+					booleans: [
+						true
+					]
 				}
 			]
 		};
@@ -104,12 +113,13 @@ describe('Test Model', () => {
 			string: fakeDto.string,
 			strings: fakeDto.strings,
 			enum: TestEnumFromDto[fakeDto.enum],
-			enums: TestEnumFromDto[fakeDto.enums],
+			enums: fakeDto.enums?.map(value => TestEnumFromDto[value]),
 			date: DateHelper.fromUtcStringToDate(fakeDto.date),
-			dates: DateHelper.fromUtcStringToDate(fakeDto.dates),
+			dates: fakeDto.dates?.map(value => DateHelper.fromUtcStringToDate(value)),
 			dateNullable: DateHelper.fromUtcStringToDate(fakeDto.dateNullable),
-			dateNullables: DateHelper.fromUtcStringToDate(fakeDto.dateNullables),
+			dateNullables: fakeDto.dateNullables?.map(value => DateHelper.fromUtcStringToDate(value)),
 			boolean: fakeDto.boolean,
+			booleans: fakeDto.booleans,
 			myTestObj: TestObject.fromDto(fakeDto.myTestObj),
 			myTestObjs: fakeDto.myTestObjs?.map(value => TestObject.fromDto(value))
 		});
@@ -119,16 +129,29 @@ describe('Test Model', () => {
 	it('should convert model to dto instance - Case dto not empty', () => {
 		const fakeModel = new Test({
 			number: 4200,
-			numbers: 4200,
+			numbers: [
+				4200
+			],
 			string: 'string',
-			strings: 'strings',
+			strings: [
+				'strings'
+			],
 			enum: Object.values(TestEnum)[0],
-			enums: Object.values(TestEnum)[0],
+			enums: [
+				Object.values(TestEnum)[0]
+			],
 			date: new Date(2020,1,1),
-			dates: new Date(2020,1,1),
+			dates: [
+				new Date(2020,1,1)
+			],
 			dateNullable: new Date(2020,1,1),
-			dateNullables: new Date(2020,1,1),
+			dateNullables: [
+				new Date(2020,1,1)
+			],
 			boolean: true,
+			booleans: [
+				true
+			],
 			myTestObj: {
 					number: 4200,
 					numbers: [
@@ -150,7 +173,10 @@ describe('Test Model', () => {
 					dateNullables: [
 						new Date(2020,1,1)
 					],
-					boolean: true
+					boolean: true,
+					booleans: [
+						true
+					]
 				},
 			myTestObjs: [
 				{
@@ -174,7 +200,10 @@ describe('Test Model', () => {
 					dateNullables: [
 						new Date(2020,1,1)
 					],
-					boolean: true
+					boolean: true,
+					booleans: [
+						true
+					]
 				}
 			]
 		});
@@ -184,14 +213,15 @@ describe('Test Model', () => {
 			string: fakeModel.string,
 			strings: fakeModel.strings,
 			enum: TestEnumToDto[fakeModel.enum],
-			enums: TestEnumToDto[fakeModel.enums],
-			date:  DateHelper.fromDateToString(fakeModel.date),
-			dates:  DateHelper.fromDateToString(fakeModel.dates),
-			dateNullable:  DateHelper.fromDateToString(fakeModel.dateNullable),
-			dateNullables:  DateHelper.fromDateToString(fakeModel.dateNullables),
+			enums: fakeModel.enums?.map(value => TestEnumToDto[value]),
+			date: DateHelper.fromDateToString(fakeModel.date),
+			dates: fakeModel.dates?.map(value => DateHelper.fromDateToString(value)),
+			dateNullable: DateHelper.fromDateToString(fakeModel.dateNullable),
+			dateNullables: fakeModel.dateNullables?.map(value => DateHelper.fromDateToString(value)),
 			boolean: fakeModel.boolean,
+			booleans: fakeModel.booleans,
 			myTestObj: TestObject.fromDto(fakeModel.myTestObj),
-			myTestObjs: fakeModel.myTestObjs?.map(value =>  value.toDto())
+			myTestObjs: fakeModel.myTestObjs?.map(value => value.toDto())
 		};
 		expect(Test.toDto(fakeModel)).toEqual(expectedDtoInstance);
 	});

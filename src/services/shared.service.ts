@@ -12,31 +12,51 @@ export function getPropertyWithValue(fileDetails: FileDetails, stringRef: String
 		if(isEmpty) {
 			if(property.type === StringValue.NUMBER || property.type === StringValue.BOOLEAN || property.type === StringValue.STRING ){
 				stringRef.value += 'undefined';
-			} else {
+			} else if(property.type.includes(StringValue.TAB)){
+				stringRef.value += StringValue.TAB;
+			} else {		
 				stringRef.value += 'null';
 			}
 		} else {
+			//TODO: Remove colon from the begining
 			property.name = property.name.replace(StringValue.COLON, StringValue.EMPTY);
 			if(property.type?.includes(StringValue.TAB) ){
 				if(!isFake){
+					const name = property.name.replace(StringValue.COLON, StringValue.EMPTY);
+					const type = property.type.replace(StringValue.TAB, StringValue.EMPTY);
 					if(isModel){
-						stringRef.value += stringFake + StringValue.DOT +  property.name.replace(StringValue.COLON, StringValue.EMPTY) + StringValue.MAP_VALUE + (property.type.replace(StringValue.TAB, StringValue.EMPTY)) + StringValue.DOT + objectFrom(isModel, isDto) +'(' + StringValue.VALUE + ')' + ')';
+						if(type === StringValue.DATE){
+							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
+						} else if (type.includes(StringValue.ENUM)) {
+							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + type + enumFrom(isModel, isDto) + '[' + StringValue.VALUE + ']' + ')';
+						} else if (type === StringValue.NUMBER || type === StringValue.STRING || type === StringValue.BOOLEAN) {
+							stringRef.value += stringFake + StringValue.DOT + name
+						} else {
+							stringRef.value += stringFake + StringValue.DOT + name+ StringValue.MAP_VALUE + type + StringValue.DOT + objectFrom(isModel, isDto) +'(' + StringValue.VALUE + ')' + ')';
+						}
 					} else if(isDto){
-						stringRef.value += stringFake + StringValue.DOT +  property.name.replace(StringValue.COLON, StringValue.EMPTY) + StringValue.MAP_VALUE + StringValue.SPACE + StringValue.VALUE + StringValue.DOT + objectFrom(isModel, isDto) +'()' + ')';
+						if(type === StringValue.DATE){
+							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + dateFrom(isModel, isDto) + StringValue.VALUE + ')' + ')';
+						} else if (type.includes(StringValue.ENUM)) {
+							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + type + enumFrom(isModel, isDto)+ '[' + StringValue.VALUE + ']' + ')';
+						}else if (type === StringValue.NUMBER || type === StringValue.STRING || type === StringValue.BOOLEAN) {
+							stringRef.value += stringFake + StringValue.DOT + name
+						}else {
+							stringRef.value += stringFake + StringValue.DOT + name + StringValue.MAP_VALUE + StringValue.VALUE + StringValue.DOT + objectFrom(isModel, isDto) +'()' + ')';
+						}
 					}
 				} else {
 					stringRef.value += '[';
 					stringRef.value += StringValue.R;
 					if(!property.type?.includes(StringValue.STRING)
-					&& !property.type?.includes(StringValue.NUMBER)
-					&& !property.type?.includes(StringValue.DATE)
-					&& !property.type?.includes(StringValue.BOOLEAN)
-					&& !property.type?.includes(StringValue.ENUM)){
-						readDtoFile(fileDetails, stringRef, false, tabCount + 1, {...property, type: property.type.replace(StringValue.TAB, StringValue.EMPTY)}, isDto, isEmpty, isModel, isFake);
-					} else {
-						property.type = property.type.replace(StringValue.TAB, StringValue.EMPTY);
+						&& !property.type?.includes(StringValue.NUMBER)
+						&& !property.type?.includes(StringValue.DATE)
+						&& !property.type?.includes(StringValue.ENUM)
+						&& !property.type?.includes(StringValue.BOOLEAN)){
+							readDtoFile(fileDetails, stringRef, false, tabCount + 1, {...property, type: property.type.replace(StringValue.TAB, StringValue.EMPTY)}, isDto, isEmpty, isModel, isFake);
+					} else {						
 						addTabulation(stringRef, tabCount + 1);					
-						addPropertyWithValueByType(fileDetails, stringRef, tabCount + 1, property, isDto, isEmpty, isModel, isFake);
+						addPropertyWithValueByType(fileDetails, stringRef, tabCount + 1, property, isDto, isEmpty, isModel, isFake, true);
 					}
 					stringRef.value += StringValue.R;
 					addTabulation(stringRef, tabCount);
@@ -140,37 +160,42 @@ function getLinesFromFile(filePath: string): string[] | null {
 	}
 	return lines;
 }
-function addPropertyWithValueByType(fileDetails: FileDetails, stringRef: StringRef, tabCount: number, property: PropertyType, isDto: boolean, isEmpty: boolean, isModel: boolean, isFake: boolean) {
+function addPropertyWithValueByType(fileDetails: FileDetails, stringRef: StringRef, tabCount: number, property: PropertyType, isDto: boolean, isEmpty: boolean, isModel: boolean, isFake: boolean, generateOne: boolean = false) {
 	const stringFake = stringFakeBuilder(isModel, isDto);
-	if(property.type === StringValue.DATE || property.type.includes(StringValue.DATE)){
+	let propertyClone = {...property}
+	if(generateOne){
+		//Remove [] from type because we want to generate only one element in list
+		propertyClone.type = propertyClone.type.replace(StringValue.TAB, StringValue.EMPTY);
+	}
+	if(propertyClone.type === StringValue.DATE || propertyClone.type.includes(StringValue.DATE)){
 		if(!isFake){
 			stringRef.value += dateFrom(isModel, isDto) + stringFake + '.' +  property.name + ')';
 		} else {
 			stringRef.value += newDate(isModel, isDto);		
 		}
-	} else if(property.type.endsWith('Enum') || property.type.endsWith('EnumDto')) {
+	} else if(propertyClone.type.endsWith('Enum') || propertyClone.type.endsWith('EnumDto')) {
 		if(!isFake){
-			stringRef.value += property.type + enumFrom(isModel, isDto) + '[' + stringFake + '.' + property.name + ']';
+			stringRef.value += propertyClone.type + enumFrom(isModel, isDto) + '[' + stringFake + '.' + propertyClone.name + ']';
 		} else {
-			stringRef.value += 'Object.values(' + (property.type.replace(StringValue.DTO, StringValue.EMPTY) + (isDto ? StringValue.DTO : StringValue.EMPTY)) + ')' + '[0]';
+			stringRef.value += 'Object.values(' + (propertyClone.type.replace(StringValue.DTO, StringValue.EMPTY) + (isDto ? StringValue.DTO : StringValue.EMPTY)) + ')' + '[0]';
 		}
-	} else if (property.type === StringValue.BOOLEAN){
+	} else if (propertyClone.type === StringValue.BOOLEAN){
 		if(!isFake){
-			stringRef.value += stringFake + '.' + property.name;
+			stringRef.value += stringFake + '.' + propertyClone.name;
 		} else {
 			stringRef.value += 'true';
 		}
-	} else if(property.type === StringValue.STRING){
+	} else if(propertyClone.type === StringValue.STRING){
 		if(!isFake){
-			stringRef.value += stringFake + '.' +  property.name;
+			stringRef.value += stringFake + '.' +  propertyClone.name;
 		} else {
 			// Set text of string from property name
-			const text = property.name.substring(property.name.lastIndexOf(".") + 1, property.name.length);
-			stringRef.value += '\'' + (text ?? property.name) + '\'';
+			const text = propertyClone.name.substring(property.name.lastIndexOf(".") + 1, propertyClone.name.length);
+			stringRef.value += '\'' + (text ?? propertyClone.name) + '\'';
 		}
-	} else if(property.type === StringValue.NUMBER){
+	} else if(propertyClone.type === StringValue.NUMBER){
 		if(!isFake){
-			stringRef.value += stringFake + '.' +  property.name;
+			stringRef.value += stringFake + '.' +  propertyClone.name;
 		} else {
 			stringRef.value += '4200';
 		}

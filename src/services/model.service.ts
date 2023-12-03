@@ -35,11 +35,8 @@ export function getModelTextFromDocument(lines: string[]): string | null {
 	let mainModelName: string = "";
 	let showingText:string = "";
 	let properties: PropertyType[] = [];
-
 	const lineCount = lines.length;
 
-	showingText += 'import { DateHelper } from \'@nag/sma/shared\';';
-	showingText += StringValue.R;
 	for (let index = 0; index < lineCount; index++) {
 		const lineText = lines[index];
 		if (lineTextValid(lineText)) {

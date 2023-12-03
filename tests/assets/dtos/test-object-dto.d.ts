@@ -10,4 +10,5 @@ export interface TestObjectDto {
     dateNullable?: null | DateNullableDto;   
     dateNullables?: Array<DateNullableDto>;   
     boolean?: boolean;
+    booleans?: Array<boolean>;
 }

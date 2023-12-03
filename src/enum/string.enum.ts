@@ -20,7 +20,7 @@ export enum StringValue {
 	ELSE_NULL = ' : null',
 	MAP_VALUE = '?.map(value => ',
 	STRING_TO_DATE = 'DateHelper.fromUtcStringToDate(',
-	DATE_TO_STRING= ' DateHelper.fromDateToString(',
+	DATE_TO_STRING= 'DateHelper.fromDateToString(',
 	DOT = '.',
 	COLON = ':',
 	SEMI_COLON= ';',

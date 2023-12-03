@@ -13,7 +13,13 @@
     "build": "rimraf ./build && tsup",
     "publish": "npm run build && npm link"
   },
-  "keywords": [],
+  "keywords": [
+    "model",
+    "api",
+    "openapi",
+    "generator",
+    "dto"
+  ],
   "author": "Sereno",
   "license": "MIT",
   "repository": {

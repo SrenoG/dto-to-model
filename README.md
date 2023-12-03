@@ -1,3 +1,5 @@
+## Mainly used for my company, but can be used for your Angular project if yours models, Dto's or Enum match
+
 Model generator from OpenApi Dto's
 Can generate Models, specs, Mocks or Enum
 

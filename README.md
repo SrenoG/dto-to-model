@@ -1,4 +1,6 @@
-## Mainly used for my company, but can be used for your Angular project if yours models, Dto's or Enum match
+Mainly used for my company, but can be used for your Angular project if yours models, Dto's or Enum match
+See tests/assets/results folder to check what you can expect as output
+For some Type like Date/Enum, this generator use specific method, new features must provide configuration file for custom results
 
 Model generator from OpenApi Dto's
 Can generate Models, specs, Mocks or Enum

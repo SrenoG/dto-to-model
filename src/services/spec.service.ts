@@ -1,4 +1,4 @@
-import { copyFileSync, readFileSync, removeSync, writeFileSync } from "fs-extra";
+import { copyFileSync, existsSync, readFileSync, removeSync, writeFileSync } from "fs-extra";
 import path from "path";
 import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
@@ -18,12 +18,15 @@ export function generateSpecs(fsPath: string): void {
 		const file = fsPath.split(path.sep)
 		const apiName = file[file.length - 4];
 		const configApi = packageConfig.apis.find(x => x.apiName === apiName)
-		
+		const defaultDestinationPath =  fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + specFileName;
 		if(configApi === null || !configApi?.moveFiles){
-			destinationPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + specFileName
+			destinationPath = defaultDestinationPath
 		} else {
 			const basePath = process.cwd().toString() + "\\" + configApi.destinationModule + "\\" + configApi.destinationDirSpec + "\\";
 			destinationPath = basePath + specFileName;
+			if(existsSync(destinationPath)){
+				destinationPath = defaultDestinationPath;
+			}
 		}
 
 		copyFileSync(fileDetails.dtoPath, destinationPath);

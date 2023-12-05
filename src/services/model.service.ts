@@ -1,4 +1,4 @@
-import { appendFileSync, copySync, readFileSync, removeSync, writeFileSync } from "fs-extra";
+import { appendFileSync, copySync, existsSync, readFileSync, removeSync, writeFileSync } from "fs-extra";
 import path from "path";
 import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
@@ -17,21 +17,26 @@ export function generateModel(fsPath: string): void {
 		const file = fsPath.split(path.sep)
 		const apiName = file[file.length - 4];
 		const configApi = packageConfig.apis.find(x => x.apiName === apiName)
+		const defaultDestinationPath =  fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + modelFileName;
 		if(configApi === null || !configApi?.moveFiles){
-			destinationPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + modelFileName
+			destinationPath = defaultDestinationPath;
 		} else {
 			const basePath = process.cwd().toString() + "\\" + configApi.destinationModule + "\\" + configApi.destinationDirModel + "\\";
 			destinationPath = basePath + modelFileName;
-			if(configApi.updateIndex){
-				const appendLine = "export * from './" + path.parse(modelFileName).name + "';\r"
-				let listExportInFile;
-				try{
-					listExportInFile = readFileSync(basePath + "index.ts", {encoding:'utf8'}).split('\n');
-				} catch {
-					appendFileSync(basePath + "index.ts", appendLine, 'utf8')
-				}
-				if(listExportInFile && !listExportInFile.some(x => x === appendLine)) {
-					appendFileSync(basePath + "index.ts", appendLine, 'utf8')
+			if(existsSync(destinationPath)){
+				destinationPath = defaultDestinationPath;
+			} else {
+				if(configApi.updateIndex){
+					const appendLine = "export * from './" + path.parse(modelFileName).name + "';\r"
+					let listExportInFile;
+					try{
+						listExportInFile = readFileSync(basePath + "index.ts", {encoding:'utf8'}).split('\n');
+					} catch {
+						appendFileSync(basePath + "index.ts", appendLine, 'utf8')
+					}
+					if(listExportInFile && !listExportInFile.some(x => x === appendLine)) {
+						appendFileSync(basePath + "index.ts", appendLine, 'utf8')
+					}
 				}
 			}
 		}

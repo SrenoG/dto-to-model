@@ -1,6 +1,6 @@
 {
     "nodeModuleApiDir": "tests\\assets\\dtos",
-    "apis":[
+    "apis": [
         {     
             "apiName": "test-api",
             "destinationModule": "tests\\assets\\test",
@@ -9,5 +9,14 @@
             "moveFiles": true,
             "updateIndex": true
         }
-    ]
+    ],
+    "classHelpers": [
+            {
+                "objectType":"date",
+                "staticClassName":"DateHelper",
+                "importClassPath":"",
+                "staticClassMethodFromDto":"",
+                "staticClassMethodToDto":""
+            }
+        ] 
 }

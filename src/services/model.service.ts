@@ -23,9 +23,14 @@ export function generateModel(fsPath: string): void {
 			const basePath = process.cwd().toString() + "\\" + configApi.destinationModule + "\\" + configApi.destinationDirModel + "\\";
 			destinationPath = basePath + modelFileName;
 			if(configApi.updateIndex){
-				const listExportInFile = readFileSync(basePath + "index.ts", {encoding:'utf8'}).split('\n');
 				const appendLine = "export * from './" + path.parse(modelFileName).name + "';\r"
-				if(!listExportInFile.some(x => x === appendLine)) {
+				let listExportInFile;
+				try{
+					listExportInFile = readFileSync(basePath + "index.ts", {encoding:'utf8'}).split('\n');
+				} catch {
+					appendFileSync(basePath + "index.ts", appendLine, 'utf8')
+				}
+				if(listExportInFile && !listExportInFile.some(x => x === appendLine)) {
 					appendFileSync(basePath + "index.ts", appendLine, 'utf8')
 				}
 			}

@@ -1,22 +1,35 @@
 import { copyFileSync, readFileSync, removeSync, writeFileSync } from "fs-extra";
+import path from "path";
 import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
 import { FileDetails, PropertyType, StringRef } from "../interfaces";
 import { getModelTextFromDocument } from "./model.service";
-import { cleanLineText, getFileDetails, getPropertyWithValue, lineTextValid } from "./shared.service";
+import { cleanLineText, getFileDetails, getPropertyWithValue, lineTextValid, packageConfig } from "./shared.service";
 
 export function generateSpecs(fsPath: string): void {
 	const fileDetails = getFileDetails(fsPath);
 	if(!dtoFileExtensions.some(x => fileDetails.fileName.endsWith(x))){
 		throw new Error('This file isn\'t a valid Dto!');
 	} else {
+		
+		let destinationPath = "";
 		let specFileName = fileDetails.fileName?.replace('-dto.d', '.spec').replace('-dto', '.spec');
-		const baseDestPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\';
-		const fullDestPath = baseDestPath + specFileName;
-		copyFileSync(fileDetails.dtoPath, baseDestPath + specFileName);
+
+		const file = fsPath.split(path.sep)
+		const apiName = file[file.length - 4];
+		const configApi = packageConfig.apis.find(x => x.apiName === apiName)
+		
+		if(configApi === null || !configApi?.moveFiles){
+			destinationPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + specFileName
+		} else {
+			const basePath = process.cwd().toString() + "\\" + configApi.destinationModule + "\\" + configApi.destinationDirSpec + "\\";
+			destinationPath = basePath + specFileName;
+		}
+
+		copyFileSync(fileDetails.dtoPath, destinationPath);
 		let lines;
 		try {
-			lines = readFileSync(fullDestPath, {encoding:'utf8'}).split('\n').map(line => line.replace('\r', StringValue.EMPTY));
+			lines = readFileSync(fileDetails.dtoPath, {encoding:'utf8'}).split('\n').map(line => line.replace('\r', StringValue.EMPTY));
 		} catch {
 			throw new Error('file not found:' + fileDetails.fileName);
 		}	
@@ -24,14 +37,14 @@ export function generateSpecs(fsPath: string): void {
 		if(modelString){					
 			const specText = getSpecFromDocument(fileDetails, modelString.split('\n').map(line => line.replace('\r', StringValue.EMPTY)));
 			if(specText){
-				writeFileSync(fullDestPath, specText);
-			} else {
-				removeSync(baseDestPath);
+				writeFileSync(destinationPath, specText);
+			} else if(!specText && configApi?.moveFiles) {
+				removeSync(destinationPath);
 				throw new Error('Model not found in model from dto file');
 			}
-		} else {
-			removeSync(baseDestPath);
-			throw new Error('Model not found in dto file');
+		} else if(!modelString && !configApi?.moveFiles) {
+			removeSync(destinationPath);
+			throw new Error('Model not found !');
 		}						
 	}
 }

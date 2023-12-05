@@ -1,4 +1,4 @@
-import { copyFileSync, readFileSync, removeSync, writeFileSync } from 'fs-extra';
+import { copySync, readFileSync, removeSync, writeFileSync } from 'fs-extra';
 import { StringValue } from '../enum';
 import { dtoFileExtensions } from '../helpers';
 import { FileDetails, PropertyType, StringRef } from "../interfaces";
@@ -13,7 +13,7 @@ export function generateMocks(fsPath: string): void {
 		const mockFileName = fileDetails.fileName?.replace('-dto.d', '.mock').replace('-dto', '.mock');
 		const baseDestPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\';
 		const fullDestPath = baseDestPath + mockFileName;
-		copyFileSync(fileDetails.dtoPath, fullDestPath);
+		copySync(fileDetails.dtoPath, fullDestPath);
 		let lines;
 		try {
 			lines = readFileSync(fullDestPath, {encoding:'utf8'}).split('\n').map(line => line.replace('\r', StringValue.EMPTY));

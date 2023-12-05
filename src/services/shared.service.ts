@@ -1,7 +1,7 @@
 import { readFileSync } from "fs-extra";
 import { StringValue } from '../enum';
 import { dtoFileExtensions } from "../helpers";
-import { FileDetails, PropertyType, StringRef } from "../interfaces";
+import { FileDetails, PackageConfig, PropertyType, StringRef } from "../interfaces";
 
 export function getPropertyWithValue(fileDetails: FileDetails, stringRef: StringRef, tabCount: number, properties: PropertyType[], isEmpty: boolean, isDto: boolean, isModel: boolean, isFake = false) {
 	const stringFake = stringFakeBuilder(isModel, isDto);
@@ -256,3 +256,5 @@ function isObjectDto(propertyType: any) {
 export function isPrimitiveObject(type: string): boolean {
 	return [StringValue.STRING.toString(), StringValue.NUMBER.toString(), StringValue.BOOLEAN.toString()]?.includes(type)
 }
+
+export const packageConfig = require( process.cwd().toString() + "\\dto-to-model.config.json") as PackageConfig;

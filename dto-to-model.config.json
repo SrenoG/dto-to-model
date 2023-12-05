@@ -1,0 +1,13 @@
+{
+    "nodeModuleApiDir": "tests\\assets\\dtos",
+    "apis":[
+        {     
+            "apiName": "test-api",
+            "destinationModule": "tests\\assets\\test",
+            "destinationDirModel": "models",
+            "destinationDirSpec": "specs",
+            "moveFiles": true,
+            "updateIndex": true
+        }
+    ]
+}

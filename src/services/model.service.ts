@@ -1,8 +1,9 @@
-import { copySync, readFileSync, removeSync, writeFileSync } from "fs-extra";
+import { appendFileSync, copySync, readFileSync, removeSync, writeFileSync } from "fs-extra";
+import path from "path";
 import { StringValue } from "../enum";
 import { dtoFileExtensions } from "../helpers";
 import { PropertyType } from '../interfaces/property-type.interface';
-import { cleanLineText, getFileDetails, isPrimitiveObject, lineTextValid, stringArrayToTab } from "./shared.service";
+import { cleanLineText, getFileDetails, isPrimitiveObject, lineTextValid, packageConfig, stringArrayToTab } from "./shared.service";
 
 
 export function generateModel(fsPath: string): void {
@@ -10,13 +11,29 @@ export function generateModel(fsPath: string): void {
 	if(!dtoFileExtensions.some((x:string) => fileDetails.fileName.endsWith(x))){
 		throw new Error('This file isn\'t a valid Dto!');
 	} else {
+		let destinationPath = "";
 		let modelFileName = fileDetails.fileName?.replace('-dto.d', '.model').replace('-dto', '.model');
-		const baseDestPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\';
-		const fullDestPath = baseDestPath + modelFileName;
-		copySync(fileDetails.dtoPath, fullDestPath);
+
+		const file = fsPath.split(path.sep)
+		const apiName = file[file.length - 4];
+		const configApi = packageConfig.apis.find(x => x.apiName === apiName)
+		if(configApi === null || !configApi?.moveFiles){
+			destinationPath = fileDetails.filePath + 'generated' + '-' + fileDetails.baseName + '\\' + modelFileName
+		} else {
+			const basePath = process.cwd().toString() + "\\" + configApi.destinationModule + "\\" + configApi.destinationDirModel + "\\";
+			destinationPath = basePath + modelFileName;
+			if(configApi.updateIndex){
+				const listExportInFile = readFileSync(basePath + "index.ts", {encoding:'utf8'}).split('\n');
+				const appendLine = "export * from './" + path.parse(modelFileName).name + "';\r"
+				if(!listExportInFile.some(x => x === appendLine)) {
+					appendFileSync(basePath + "index.ts", appendLine, 'utf8')
+				}
+			}
+		}
+		copySync(fileDetails.dtoPath, destinationPath);
 		let lines;
 		try {
-			lines = readFileSync(fullDestPath, {encoding:'utf8'}).split('\n').map(line => line.replace('\r', StringValue.EMPTY));
+			lines = readFileSync(fsPath, {encoding:'utf8'}).split('\n').map(line => line.replace('\r', StringValue.EMPTY));
 		} catch {
 			throw new Error('file not found:' + fileDetails.fileName);
 		}
@@ -24,9 +41,9 @@ export function generateModel(fsPath: string): void {
 		const modelText = getModelTextFromDocument(lines);
 
 		if(modelText){
-			writeFileSync(fullDestPath, modelText!);		
+			writeFileSync(destinationPath, modelText!);		
 		} else {
-			removeSync(baseDestPath);
+			removeSync(destinationPath);
 			throw new Error('Model not found !');
 		}	
 	}

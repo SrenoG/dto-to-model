@@ -22,7 +22,7 @@ Check into tests/results folder what kind of generation you can expect from test
 
 You have to use it into node_module OpenApi generated API folder to found all related Dto's and populate specs and mocks.
 
-Need -dto.d.ts or -dto.ts files as interface from OpenApiGenerator, array declared as Array<T>
+Need -dto.d.ts or -dto.ts files as interface from OpenApiGenerator, array declared as Array<...>
 
 It's a BETA actually, need some improvement and cleaning code
 
